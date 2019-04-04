@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Nosnitor ProjectStandards
+Copyright © 1996-2019 Nosnitor Corporation, All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!-- Portions Copyright (c)  Microsoft.  All Rights Reserved.
+     Licensed under the Apache License, Version 2.0.
+     See License.txt in the project root for license information. -->
+
+<!-- Retrieved from:
+      https://raw.githubusercontent.com/dotnet/roslyn/master/src/Compilers/Core/Portable/RuleSet/RuleSetSchema.xsd
+     File last modified by jaredpar - May 6, 2015
+     
+     Copied on April 3, 2019.
+-->
+<xs:schema id="CodeAnalysisRuleSet"
+    targetNamespace="http://schemas.nosnitor.com/2019/04/CodeAnalysisRuleSet"
+    elementFormDefault="qualified"
+    xmlns="http://schemas.nosnitor.com/2019/04/CodeAnalysisRuleSet"
+    xmlns:mstns="http://schemas.nosnitor.com/2019/04/CodeAnalysisRuleSet"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:annotation>
+    <xs:documentation xml:lang="en">
+      Visual Studio Code Analysis Rule Set Schema Definition Language.
+      Copyright (c) Nosnitor Corporation. All rights reserved.
+      Portions Copyright (c) Microsoft Corporation. All rights reserved.
+    </xs:documentation>
+  </xs:annotation>
+
+  <!-- Every time this file changes, be sure to change the Validate method for the corresponding object in the code -->
+
+  <xs:element name="RuleSet" type="TRuleSet">
+  </xs:element>
+
+  <!-- For localization of the rule set.-->
+  <xs:complexType name="TLocalization">
+    <xs:all>
+      <!-- The localization name. -->
+      <xs:element name="Name" type="TName" minOccurs="0" maxOccurs="1" />
+      <!-- The localization description. -->
+      <xs:element name="Description" type="TDescription" minOccurs="0" maxOccurs="1" />
+    </xs:all>
+    <!-- The resource assembly used for localization. -->
+    <xs:attribute name="ResourceAssembly" type="TNonEmptyString" use="required" />
+    <!-- The resource base name used for localization. -->
+    <xs:attribute name="ResourceBaseName" type="TNonEmptyString" use="required" />
+  </xs:complexType>
+
+  <!-- Constraints for RuleHintPaths -->
+  <xs:complexType name="TRuleHintPaths">
+    <xs:sequence>
+      <!-- A path to be added for rule hints. -->
+      <xs:element name="Path" type="TNonEmptyString" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Defines the Name type. -->
+  <xs:complexType name="TName">
+    <!--  -->
+    <xs:attribute name="Resource" type="TNonEmptyString" use="required" />
+  </xs:complexType>
+
+  <!-- Defines the Description type. -->
+  <xs:complexType name="TDescription">
+    <xs:attribute name="Resource" type="TNonEmptyString" use="required" />
+  </xs:complexType>
+
+  <!-- Defines the Include type. -->
+  <xs:complexType name="TInclude">
+    <xs:attribute name="Path" type="TNonEmptyString" use="required" />
+    <xs:attribute name="Action" type="TIncludeAction" use="required" />
+  </xs:complexType>
+
+  <!-- Defines the IncludeAll type. -->
+  <xs:complexType name="TIncludeAll">
+    <xs:attribute name="Action" type="TIncludeAllAction" use="required" />
+  </xs:complexType>
+
+  <!-- Defines the Rule type. -->
+  <xs:complexType name="TRule">
+    <xs:attribute name="Id" type="TNonEmptyString" use="required" />
+    <xs:attribute name="Action" type="TRuleAction" use="required" />
+  </xs:complexType>
+
+  <!-- Defines the Rules type. -->
+  <xs:complexType name="TRules">
+    <xs:sequence>
+      <xs:element name="Rule" type="TRule" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute name="AnalyzerId" type="TNonEmptyString" use="required" />
+    <xs:attribute name="RuleNamespace" type="TNonEmptyString" use="required" />
+  </xs:complexType>
+
+  <!-- Defines a ruleset -->
+  <xs:complexType name="TRuleSet">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <!-- Allows localization of the ruleset. -->
+      <xs:element name="Localization" type="TLocalization" minOccurs="0" maxOccurs="1" />
+      <xs:element name="RuleHintPaths" type="TRuleHintPaths" minOccurs="0" maxOccurs="1" />
+      <!-- The IncludeAll element -->
+      <xs:element name="IncludeAll" type="TIncludeAll" minOccurs="0" maxOccurs="1" />
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <!-- Includes in the ruleset -->
+        <xs:element name="Include" type="TInclude" minOccurs="0" maxOccurs="unbounded" />
+        <!-- Rules in the ruleset -->
+        <xs:element name="Rules" type="TRules" minOccurs="0" maxOccurs="unbounded">
+          <xs:unique name="UniqueRuleName">
+            <xs:selector xpath="Rule" />
+            <xs:field xpath="@Id" />
+          </xs:unique>
+        </xs:element>
+      </xs:choice>
+    </xs:sequence>
+    <!-- The name of the ruleset. -->
+    <xs:attribute name="Name" type="TNonEmptyString" use="required" />
+    <!-- A description of the ruleset. Should contain examples where this ruleset should be used. -->
+    <xs:attribute name="Description" type="xs:string" use="optional" />
+    <!-- The version of the tools used with the ruleset. -->
+    <xs:attribute name="ToolsVersion" type="TNonEmptyString" use="required" />
+  </xs:complexType>
+
+  <!-- Defines the values for a rule action. -->
+  <xs:simpleType name="TRuleAction">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Error"/>
+      <xs:enumeration value="Warning"/>
+      <xs:enumeration value="Info"/>
+      <xs:enumeration value="Hidden"/>
+      <xs:enumeration value="None"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Defines the values for an include action. -->
+  <xs:simpleType name="TIncludeAction">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Error"/>
+      <xs:enumeration value="Warning"/>
+      <xs:enumeration value="Info"/>
+      <xs:enumeration value="Hidden"/>
+      <xs:enumeration value="None"/>
+      <xs:enumeration value="Default"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Defines the values for an include all action. -->
+  <xs:simpleType name="TIncludeAllAction">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Error"/>
+      <xs:enumeration value="Warning"/>
+      <xs:enumeration value="Info"/>
+      <xs:enumeration value="Hidden"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Defines a non empty string. -->
+  <xs:simpleType name="TNonEmptyString">
+    <xs:restriction base="xs:string">
+      <xs:minLength value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>
