@@ -1,9 +1,150 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- edited with XMLSpy v2014 rel. 2 sp1 (x64) (http://www.altova.com) by Jeff Block (Nosnitor Corp) -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" elementFormDefault="qualified" attributeFormDefault="unqualified" vc:minVersion="1.1">
-	<xs:element name="Dictionary">
-		<xs:annotation>
-			<xs:documentation>Visual Studio dictionary file</xs:documentation>
-		</xs:annotation>
-	</xs:element>
+<!--
+Nosnitor ProjectStandards
+Copyright © 1996-2019 Nosnitor Corporation, All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+
+<!-- Portions Copyright (c)  Microsoft.  All Rights Reserved. -->
+
+<xs:schema
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified"
+  vc:minVersion="1.1">
+  
+  <xs:element name="Dictionary">
+    
+    <xs:annotation>
+      <xs:documentation>Visual Studio dictionary file</xs:documentation>
+    </xs:annotation>
+    
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Words" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+                      
+              <xs:element name="Unrecognized" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <!-- To include a term in the list of terms that code analysis identifies as correctly spelled,
+                    add the term as the inner text of a Dictionary/Words/Recognized/Word element. Terms in
+                    Dictionary/Words/Recognized/Word elements are not case-sensitive. -->
+                    <xs:element name="Word" type="xs:string" maxOccurs="unbounded" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+                      
+              <xs:element name="Recognized" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <!-- To exclude a term from the list of terms that code analysis identifies as correctly spelled,
+                    add the term to exclude as the inner text of a Dictionary/Words/Unrecognized/Word element. Terms
+                    in Dictionary/Words/Unrecognized/Word elements are not case-sensitive.-->
+                    <xs:element name="Word" type="xs:string" maxOccurs="unbounded" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+                      
+              <xs:element name="Deprecated" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Term" type="DeprecatedTermElement" maxOccurs="unbounded" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+                      
+              <xs:element name="Compound" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Term" type="CompoundTermElement" maxOccurs="unbounded" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+                      
+              <xs:element name="DiscreteExceptions" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <!-- To exclude a term in the list of terms that code analysis identifies as a single, discrete word
+                    when the term is checked by the casing rules for compound words, add the term as the inner text of a
+                    Dictionary/Words/DiscreteExceptions/Term element. The term in
+                    Dictionary/Words/DiscreteExceptions/Term element is not case-sensitive.-->
+                    <xs:element name="Term" type="xs:string" maxOccurs="unbounded" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+                      
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Acronyms" minOccurs="0" maxOccurs="1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="CasingExceptions" minOccurs="0" maxOccurs="1">
+                <xs:complexType>
+                  <xs:sequence>
+                    <!--To include an acronym in the list of terms that code analysis identifies as correctly spelled
+                    and to indicate how the acronym when the term is checked by the casing rules for compound words,
+                    add the term as the inner text of a Dictionary/Acronyms/CasingExceptions/Acronym element. The
+                    acronym in the Dictionary/Acronyms/CasingExceptions/Acronym element is case-sensitive.-->
+                    <xs:element name="Acronym" maxOccurs="unbounded" />
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="DeprecatedTermElement">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <!-- To include a term in the list of terms that code analysis identifies as deprecated, add the term as the
+        inner text of a Dictionary/Words/Deprecated/Term element. A deprecated term is a word that is spelled
+        correctly but should not be used.
+          
+        To include a suggested alternate term in the warning, specify the alternate in the PreferredAlternate attribute
+        of the Term element. You can leave the attribute value empty if you do not want to suggest an alternate.
+
+        The deprecated term in Dictionary/Words/ Deprecated/Term element is not case-sensitive. The PreferredAlternate
+        attribute value is case-sensitive. Use Pascal case for compound alternates.-->
+        <xs:attribute name="PreferredAlternate" type="xs:string">
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="CompoundTermElement">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <!-- The built-in dictionary identifies some terms as single, discrete terms rather than a compound term. To
+        include a term in the list of terms that code analysis identifies as a compound word and to specify the correct
+        casing of the term, add the term as the inner text of a Dictionary/Words/Compound/Term element. In the
+        CompoundAlternate attribute of the Term element, specify the individual words that make up the compound term
+        by capitalizing the first letter of the individual words (Pascal case). Note that the term specified in the
+        inner text is automatically added to the Dictionary/Words/DiscreteExceptions list.
+
+        The deprecated term in Dictionary/Words/ Deprecated/Term element is not case-sensitive. The PreferredAlternate
+        attribute value is case-sensitive. Use Pascal case for compound alternates.-->
+        <xs:attribute name="CompoundAlternate" type="xs:string">
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  
 </xs:schema>
